@@ -8,7 +8,7 @@ node {
     }
 
     stage('Clone Repository') {
-        echo 'Cloning  code from GitHub'
+        echo 'Cloning lates code from GitHub'
 
         git(
             branch: 'main',
