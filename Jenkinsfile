@@ -7,7 +7,7 @@ node {
     }
 
     stage('Clone Repo') {
-        echo 'Cloning the repository'
+        echo 'Cloning the git repository'
 
         git(
             branch: 'main',
