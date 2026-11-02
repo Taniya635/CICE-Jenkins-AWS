@@ -12,7 +12,7 @@ node {
 
         git(
             branch: 'main',
-            url: 'https://github.com/Taniya635/CICE-Jenkins-AWS'
+            url: 'https://github.com/Taniya635/CICE-Jenkins-AWS.git'
         )
     }
 
