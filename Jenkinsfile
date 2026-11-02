@@ -1,13 +1,14 @@
+
 node {
-    def appDir = "${env.HOME}/Desktop/nextjs-app"
+    def appDir = "${env.HOME}/nextjs-app"
 
     stage('Clean Workspace') {
-        echo 'Cleaning Jenkins Workspace'
+        echo 'Cleaning Jenkins workspace'
         deleteDir()
     }
 
-    stage('Clone Repo') {
-        echo 'Cloning the git repository'
+    stage('Clone Repository') {
+        echo 'Cloning latest code from GitHub'
 
         git(
             branch: 'main',
@@ -16,37 +17,47 @@ node {
     }
 
     stage('Deploy Application') {
-        echo 'Deploying Next.js application'
+        timeout(time: 20, unit: 'MINUTES') {
+            echo 'Starting deployment'
 
-        sh """
-            set -e
+            sh """
+                set -eux
 
-            mkdir -p "${appDir}"
+                echo "Checking Node and npm"
+                node --version
+                npm --version
 
-            rsync -av --delete \
-                --exclude='.git' \
-                --exclude='node_modules' \
-                ./ "${appDir}/"
+                mkdir -p '${appDir}'
 
-            cd "${appDir}"
+                rsync -av --delete \
+                    --exclude='.git' \
+                    --exclude='node_modules' \
+                    ./ '${appDir}/'
 
-            npm install
-            npm run build
+                cd '${appDir}'
 
-            PID=\$(lsof -ti tcp:3000 || true)
+                echo "Installing dependencies"
+                npm install
 
-            if [ -n "\$PID" ]; then
-                echo "Stopping existing application..."
-                kill \$PID
-            fi
+                echo "Building Next.js application"
+                npm run build
 
-            echo "Starting Next.js application..."
+                echo "Stopping previous application"
+                PID=\$(lsof -ti tcp:3000 || true)
 
-            nohup npm run start > app.log 2>&1 < /dev/null &
-            
-            sleep 5
+                if [ -n "\$PID" ]; then
+                    kill \$PID
+                    sleep 2
+                fi
 
-            echo "Application deployment completed."
-        """
+                echo "Starting application"
+                nohup npm run start > app.log 2>&1 < /dev/null &
+
+                sleep 5
+                cat app.log
+
+                echo "Deployment completed"
+            """
+        }
     }
 }
