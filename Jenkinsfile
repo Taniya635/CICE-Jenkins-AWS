@@ -1,3 +1,9 @@
+properties([
+    pipelineTriggers([
+        pollSCM('H/2 * * * *')
+    ])
+])
+
 
 node {
     def appDir = "${env.HOME}/Desktop/nextjs-app"
